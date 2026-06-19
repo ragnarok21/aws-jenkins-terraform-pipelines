@@ -4,7 +4,6 @@ pipeline {
     tools {
         terraform 'terraform' 
     }
-    AWS-ACCESS-KEY-ID
     environment {
         // Terraform leerá estas variables de entorno de forma automática
         AWS_ACCESS_KEY_ID     = credentials('AWS-ACCESS-KEY-ID')
