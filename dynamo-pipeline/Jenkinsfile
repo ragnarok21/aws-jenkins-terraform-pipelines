@@ -39,32 +39,55 @@ pipeline {
             }
         }
 
-        stage('Checkout folder') {
-            steps {
-                sh 'cd terraform-templates'
-            }
-        }
-
-        stage('Verify folder') {
+        stage('Verify Repository') {
             steps {
                 sh 'ls -la' // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
             }
         }
 
-        stage('Terraform Init') {
+        stage('Get Terraform File Name') {
             steps {
-                sh 'terraform init'
+                script {
+                    dir('jenkins-terraform/terraform-templates') {
+                        // Obtiene el nombre del archivo .tf
+                        def tfFileName = sh(script: 'ls -1 *.tf | head -1', returnStdout: true).trim()
+                        if (tfFileName) {
+                            echo "Archivo Terraform encontrado: ${tfFileName}"
+                            env.TF_FILE_NAME = tfFileName
+                        } else {
+                            error('No se encontraron archivos .tf en terraform-templates')
+                        }
+                    }
+                }
             }
         }
+
+        stage('Terraform Init') {
+            steps {
+                dir('jenkins-terraform/terraform-templates') {
+                    sh 'terraform init'
+                }
+            }
+        }
+
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan'
+                script {
+                    dir('jenkins-terraform/terraform-templates') {
+                        // Usa el nombre del archivo .tf para generar el nombre del plan
+                        def planName = env.TF_FILE_NAME.replaceAll(/\.tf$/, '.tfplan')
+                        sh "terraform plan -out=${planName}"
+                        env.TFPLAN_NAME = planName
+                    }
+                }
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve'
+                dir('jenkins-terraform/terraform-templates') {
+                    sh "terraform apply -auto-approve ${env.TFPLAN_NAME}"
+                }
             }
         }
     }
