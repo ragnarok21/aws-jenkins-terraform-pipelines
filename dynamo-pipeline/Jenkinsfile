@@ -6,32 +6,29 @@ pipeline {
     }
     environment {
         // Terraform leerá estas variables de entorno de forma automática
-        AWS_ACCESS_KEY_ID     = credentials('AWS-ACCESS-KEY-ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS-SECRET-ACCESS-KEY')
-        AWS_ENDPOINT_URL        = 'http://localhost:4566'
-        AWS_DEFAULT_REGION    = 'us-east-1' // Define tu región por defecto aquí
-    }
-
-    parameters {
-        string(name: 'REPO_URL', defaultValue: 'https://github.com/ragnarok21/aws-jenkins-terraform-example.git', description: 'URL del repositorio Git a descargar')
-        string(name: 'BRANCH', defaultValue: 'master', description: 'Rama a clonar')
-        string(name: 'CREDENTIALS_ID', defaultValue: 'GITHUB_CREDENTIALS', description: 'ID de credenciales existentes en Jenkins para clonar el repositorio')
+        TF_VAR_aws_access_key = credentials('AWS-ACCESS-KEY-ID')
+        TF_VAR_aws_secret_key = credentials('AWS-SECRET-ACCESS-KEY')
+        TF_VAR_aws_endpoint_url = env.AWS_ENDPOINT_URL
+        TF_VAR_aws_region = "us-east-1"
+        REPO_URL = "https://github.com/ragnarok21/aws-jenkins-terraform-example.git"
+        BRANCH = "master"
+        CREDENTIALS_ID = "GITHUB_CREDENTIALS"
     }
     
     stages {
         stage('Checkout Repo Terraform file') {
             steps {
                 script {
-                    def credentialsId = params.CREDENTIALS_ID?.trim()
+                    def credentialsId = env.CREDENTIALS_ID?.trim()
                     if (!credentialsId) {
                         error('Debes indicar un CREDENTIALS_ID existente en Jenkins')
                     }
 
                     // Descarga explícita del repositorio usando credenciales existentes en Jenkins
                     checkout scmGit(
-                        branches: [[name: params.BRANCH]],
+                        branches: [[name: env.BRANCH]],
                         userRemoteConfigs: [[
-                            url: params.REPO_URL,
+                            url: env.REPO_URL,
                             credentialsId: credentialsId
                         ]]
                     )
@@ -41,7 +38,7 @@ pipeline {
 
         stage('Verificacion llegada a floci local') {
             steps {
-                sh 'curl http://host.docker.internal:4566/health' // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
+                sh "curl ${env.AWS_ENDPOINT_URL}/health" // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
             }
         }
 
