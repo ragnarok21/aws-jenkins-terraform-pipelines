@@ -8,7 +8,7 @@ pipeline {
         // Terraform leerá estas variables de entorno de forma automática
         TF_VAR_aws_access_key = credentials('AWS-ACCESS-KEY-ID')
         TF_VAR_aws_secret_key = credentials('AWS-SECRET-ACCESS-KEY')
-        TF_VAR_aws_endpoint_url = env.AWS_ENDPOINT_URL
+        TF_VAR_aws_endpoint_url = "${env.AWS_ENDPOINT_URL}"
         TF_VAR_aws_region = "us-east-1"
         REPO_URL = "https://github.com/ragnarok21/aws-jenkins-terraform-example.git"
         BRANCH = "master"
@@ -38,7 +38,7 @@ pipeline {
 
         stage('Verificacion llegada a floci local') {
             steps {
-                sh "curl ${env.AWS_ENDPOINT_URL}/health" // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
+                sh 'curl ${env.AWS_ENDPOINT_URL}/health' // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
             }
         }
 
