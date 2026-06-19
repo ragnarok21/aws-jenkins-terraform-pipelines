@@ -48,7 +48,7 @@ pipeline {
         stage('Get Terraform File Name') {
             steps {
                 script {
-                    dir('jenkins-terraform/terraform-templates') {
+                    dir('terraform-templates') {
                         // Obtiene el nombre del archivo .tf
                         def tfFileName = sh(script: 'ls -1 *.tf | head -1', returnStdout: true).trim()
                         if (tfFileName) {
@@ -64,7 +64,7 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                dir('jenkins-terraform/terraform-templates') {
+                dir('terraform-templates') {
                     sh 'terraform init'
                 }
             }
@@ -73,7 +73,7 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 script {
-                    dir('jenkins-terraform/terraform-templates') {
+                    dir('terraform-templates') {
                         // Usa el nombre del archivo .tf para generar el nombre del plan
                         def planName = env.TF_FILE_NAME.replaceAll(/\.tf$/, '.tfplan')
                         sh "terraform plan -out=${planName}"
@@ -85,7 +85,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                dir('jenkins-terraform/terraform-templates') {
+                dir('terraform-templates') {
                     sh "terraform apply -auto-approve ${env.TFPLAN_NAME}"
                 }
             }
