@@ -36,12 +36,6 @@ pipeline {
             }
         }
 
-        stage('Verificacion llegada a floci local') {
-            steps {
-                sh "curl ${env.AWS_ENDPOINT_URL}/health" // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
-            }
-        }
-
         stage('Get Terraform File Name') {
             steps {
                 script {
