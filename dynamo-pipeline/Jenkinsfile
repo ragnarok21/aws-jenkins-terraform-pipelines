@@ -41,18 +41,16 @@ pipeline {
 
         stage('Checkout folder') {
             steps {
-                dir('terraform-templates') {
-                    // Cambia al directorio terraform-templates
-                }
+                sh 'cd terraform-templates'
             }
         }
 
-         stage('Verify folder') {
+        stage('Verify folder') {
             steps {
                 sh 'ls -la' // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
             }
         }
-        
+
         stage('Terraform Init') {
             steps {
                 sh 'terraform init'
