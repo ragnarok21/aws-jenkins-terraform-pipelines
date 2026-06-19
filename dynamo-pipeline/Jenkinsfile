@@ -1,9 +1,21 @@
 pipeline {
     agent any
 
+    tools {
+        terraform 'terraform' 
+    }
+    AWS-ACCESS-KEY-ID
+    environment {
+        // Terraform leerá estas variables de entorno de forma automática
+        AWS_ACCESS_KEY_ID     = credentials('AWS-ACCESS-KEY-ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS-SECRET-ACCESS-KEY')
+        AWS_ENDPOINT_URL        = 'http://localhost:4566'
+        AWS_DEFAULT_REGION    = 'us-east-1' // Define tu región por defecto aquí
+    }
+
     parameters {
         string(name: 'REPO_URL', defaultValue: 'https://github.com/ragnarok21/aws-jenkins-terraform-example.git', description: 'URL del repositorio Git a descargar')
-        string(name: 'BRANCH', defaultValue: 'main', description: 'Rama a clonar')
+        string(name: 'BRANCH', defaultValue: 'master', description: 'Rama a clonar')
         string(name: 'CREDENTIALS_ID', defaultValue: 'GITHUB_CREDENTIALS', description: 'ID de credenciales existentes en Jenkins para clonar el repositorio')
     }
     
@@ -27,6 +39,28 @@ pipeline {
                 }
             }
         }
-        
+        stage('Checkout folder') {
+            steps {
+                dir('terraform-templates') {
+                    // Cambia al directorio terraform-templates
+                }
+            }
+        }
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+        stage('Terraform Plan') {
+            steps {
+                sh 'terraform plan'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve'
+            }
+        }
     }
 }
