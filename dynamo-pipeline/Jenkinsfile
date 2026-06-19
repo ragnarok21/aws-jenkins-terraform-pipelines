@@ -39,9 +39,9 @@ pipeline {
             }
         }
 
-        stage('Verify Repository') {
+        stage('Verificacion llegada a floci local') {
             steps {
-                sh 'ls -la' // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
+                sh 'curl http://host.docker.internal:4566/health' // Verifica que el repositorio se ha clonado correctamente y muestra su contenido
             }
         }
 
