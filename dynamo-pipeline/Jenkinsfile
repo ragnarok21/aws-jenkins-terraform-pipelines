@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'REPO_URL', defaultValue: 'https://github.com/ragnarok21/aws-jenkins-terraform-example.git', description: 'URL del repositorio Git a descargar')
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Rama a clonar')
+        string(name: 'CREDENTIALS_ID', defaultValue: 'github-credentials', description: 'ID de credenciales existentes en Jenkins para clonar el repositorio')
+    }
+    
+    stages {
+        stage('Checkout Repo Terraform file') {
+            steps {
+                script {
+                    def credentialsId = params.CREDENTIALS_ID?.trim()
+                    if (!credentialsId) {
+                        error('Debes indicar un CREDENTIALS_ID existente en Jenkins')
+                    }
+
+                    // Descarga explícita del repositorio usando credenciales existentes en Jenkins
+                    checkout scmGit(
+                        branches: [[name: params.BRANCH]],
+                        userRemoteConfigs: [[
+                            url: params.REPO_URL,
+                            credentialsId: credentialsId
+                        ]]
+                    )
+                }
+            }
+        }
+        
+    }
+}
